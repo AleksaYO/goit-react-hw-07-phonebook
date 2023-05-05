@@ -1,49 +1,54 @@
 import { initialState } from './initialState';
-import { createSlice } from '@reduxjs/toolkit';
-import { Notify } from 'notiflix';
-import { fetchAll } from './operations';
+import { createSlice, isAnyOf } from '@reduxjs/toolkit';
+import { fetchAll, fetchCreate, fetchDelete } from './operations';
+import Notiflix from 'notiflix';
+
+const getContacts = (state, { payload }) => {
+  state.contacts.items = payload;
+  state.contacts.isLoading = false;
+};
+
+const createContact = (state, { payload }) => {
+  state.contacts.items.push(payload);
+  state.contacts.isLoading = false;
+};
+
+const pendingContact = state => {
+  state.contacts.isLoading = true;
+};
+
+const deleteContact = (state, { payload }) => {
+  state.contacts.items = state.contacts.items.filter(
+    item => item.id !== payload.id
+  );
+};
+
+const rejectedContact = () => {
+  Notiflix.Notify.failure('Где-то вы накосячили');
+};
+
+const fetchesPending = [fetchAll.pending, fetchCreate.pending];
+const fetchesRejected = [
+  fetchAll.rejected,
+  fetchCreate.rejected,
+  fetchDelete.rejected,
+];
 
 const phonebookSlice = createSlice({
   name: 'phonebook',
   initialState,
   reducers: {
-    //   addContact: {
-    //     reducer(state, { payload }) {
-    //       if (state.contacts.items.some(item => item.number === payload.number)) {
-    //         Notify.failure('Контакт с таким номером уже существует');
-    //         return;
-    //       } else {
-    //         state.contacts.items.push(payload);
-    //       }
-    //     },
-    //     prepare({ name, number }) {
-    //       return {
-    //         payload: {
-    //           name,
-    //           number,
-    //           id: nanoid(),
-    //         },
-    //       };
-    //     },
-    //   },
-    //   deleteContact: {
-    //     reducer(state, { payload }) {
-    //       state.contacts.items = state.contacts.items.filter(
-    //         item => item.id !== payload
-    //       );
-    //     },
-    //   },
     filteredContacts(state, { payload }) {
       state.filter = payload;
     },
   },
-  extraReducers: {
-    [fetchAll.pending](state) {},
-    [fetchAll.fulfilled](state, { payload }) {
-      state.contacts.items.push(payload);
-    },
-    [fetchAll.rejected](state, action) {},
-  },
+  extraReducers: builder =>
+    builder
+      .addCase(fetchAll.fulfilled, getContacts)
+      .addCase(fetchCreate.fulfilled, createContact)
+      .addCase(fetchDelete.fulfilled, deleteContact)
+      .addMatcher(isAnyOf(...fetchesPending), pendingContact)
+      .addMatcher(isAnyOf(...fetchesRejected), rejectedContact),
 });
 
 export const { filteredContacts } = phonebookSlice.actions;

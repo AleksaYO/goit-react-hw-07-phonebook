@@ -1,13 +1,12 @@
 import { useState } from 'react';
-import { fetchAll } from 'redux/operations';
-// import { useDispatch } from 'react-redux';
-// import { addContact } from 'redux/slice';
+import { fetchAll, fetchCreate } from 'redux/operations';
+import { useDispatch } from 'react-redux';
 import css from './Phonebook.module.css';
 
 export function Form({ UpdateContacs }) {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
   const onChange = e => {
     if (e.target.name === 'name') {
@@ -20,7 +19,7 @@ export function Form({ UpdateContacs }) {
 
   const onSubmit = e => {
     e.preventDefault();
-    // dispatch(addContact({ name, number }));
+    dispatch(fetchCreate({ name, number }));
 
     reset();
   };
