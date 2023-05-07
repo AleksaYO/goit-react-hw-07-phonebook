@@ -21,6 +21,6 @@ export const fetchDelete = createAsyncThunk(
   'contacts/fetchDelete',
   async id => {
     const { data } = await axios.delete(`/contacts/${id}`);
-    return data;
+    return data.id;
   }
 );

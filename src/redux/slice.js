@@ -19,7 +19,7 @@ const pendingContact = state => {
 
 const deleteContact = (state, { payload }) => {
   state.contacts.items = state.contacts.items.filter(
-    item => item.id !== payload.id
+    item => item.id !== payload
   );
 };
 
